@@ -9,7 +9,7 @@ From Matlab:
 ```vildsi_export_spikes(outfile_for_spiking_data, y)```
 
 - *outfile_for_spiking_data* - filename, will be written, store spiketrains in an HDF5 file 
-- *y* -  millisecond-binned spiketrains. 3-D Matlab array [nNeurons x nTimesteps x nTrials]
+- *y* -  binned spiketrains. 3-D Matlab array [nNeurons x nTimesteps x nTrials]
 
 From the command line:
 
