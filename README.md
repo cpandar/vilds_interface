@@ -13,18 +13,19 @@ From Matlab:
 
 From the command line:
 
-```python run_vilds.py outfile_for_spiking_data outfile_for_vilds_results n_latents```
+```python run_vilds.py outfile_for_spiking_data outfile_for_vilds_model outfile_for_vilds_estimates n_latents```
 
 - *outfile_for_spiking_data* - filename, output from previous step
-- *outfile_for_vilds_results* - filename, will be written, stores the results of vilds in an HDF5 file
+- *outfile_for_vilds_model* - filename, will be written, stores the results of vilds model fit
+- *outfile_for_vilds_estimates* - filename, will be written, stores estimates computed using the vilds model (e.g., posterior means)
 - *n_latents* - dimensionality of the LDS to fit
 
 
 Back in Matlab:
 
-```results = vildsi_import_results(outfile_for_vilds_results)```
+```results = vildsi_import_results(outfile_for_vilds_estimates)```
 
-- *outfile_for_vilds_results* - filename, output from previous step
+- *outfile_for_vilds_estimates* - filename, output from previous step
 
 
 ## Components

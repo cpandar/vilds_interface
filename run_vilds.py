@@ -12,33 +12,34 @@ PATH_TO_VLDS = 'submodules/vilds/'
 
 # import the data
 import sys
-import data_utils
+import file_utils
 
 # handle command line args
 # caller should pass in a filename for data to be loaded
-assert len(sys.argv)>=3, 'need to pass in a filename to load and an output filename'
+assert len(sys.argv)>=3, 'need to pass in a filename to load, an output filename for model, and output filename for estimates'
 spikefile = sys.argv[1]
-outfile = sys.argv[2]
+model_outfile = sys.argv[2]
+estimates_outfile = sys.argv[3]
 
-if len(sys.argv)>3:
-    nlatent = int(sys.argv[3])
+print "Writing model out to: " + model_outfile
+print "Writing estimates out to: " + estimates_outfile
+
+if len(sys.argv)>4:
+    nlatent = int(sys.argv[4])
 else:
     nlatent = 3;
 
 print('loading data from: ' + spikefile)
-data_in = data_utils.load(spikefile)
+data_in = file_utils.load(spikefile)
 
 # data comes in with as data_in['train'] and data_in['valid']
 # each is nTrials x nTimebins x nNeurons
 
-print 'training dimensions:'
-print data_in['train'].shape
-print 'validation dimensions:'
-print data_in['valid'].shape
+print 'training dimensions:' + str(data_in['train'].shape)
+print 'validation dimensions:' + str(data_in['valid'].shape)
 
 n_train_trials = data_in['train'].shape[0]
 n_valid_trials = data_in['valid'].shape[0]
-
 n_neurons = data_in['train'].shape[2]
 if n_neurons != data_in['valid'].shape[2]:
     raise('training and validation do not match')
@@ -46,6 +47,11 @@ if n_neurons != data_in['valid'].shape[2]:
 n_timebins = data_in['train'].shape[1]
 if n_timebins != data_in['valid'].shape[1]:
     raise('training and validation do not match')
+
+print 'training trials: ' + str(n_train_trials)
+print 'validation trials: ' + str(n_valid_trials)
+print 'num timebins: ' + str(n_timebins)
+print 'num neurons: ' + str(n_neurons)
 
 # the variables 'yDim' and 'xDim' are used later in the code.
 yDim = n_neurons
@@ -202,4 +208,26 @@ for ie in np.arange(n_epochs):
     for y, _ in yiter:
         cost.append(train_fn(y))
     print cost[-1]
-                
+#    cost.append(train_fn(y_data_train[0]))
+
+
+
+model = sgvb
+# now that model is trained, we should be able to calculate some posterior mean estimates
+posterior_means_train=[]
+for itr in np.arange(y_data_train.shape[0]):
+    posterior_means_train.append(sgvb.mrec.postX.eval({sgvb.Y: y_data_train[itr]}))
+
+posterior_means_valid=[]
+for itr in np.arange(y_data_valid.shape[0]):
+    posterior_means_valid.append(sgvb.mrec.postX.eval({sgvb.Y: y_data_valid[itr]}))
+
+
+file_utils.pickle_sgvb(sgvb, model_outfile)
+
+
+dict_out = {'posterior_means_train' : posterior_means_train,
+            'posterior_means_valid' : posterior_means_valid}
+
+file_utils.save(dict_out, estimates_outfile)
+
