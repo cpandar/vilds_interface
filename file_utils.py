@@ -43,13 +43,13 @@ import cPickle as pickle
 # serialize and deserialize the sgvb models to file
 def pickle_sgvb(model, fname):
     # make sure fname has a .p at the end
-    if ~fname.endswith('.p'):
+    if ~fname.endswith('.p')==0:
         fname = fname + '.p'
     pickle.dump(model, open(fname, "wb"))
 
 
 def depickle_sgvb(fname):
     # make sure fname has a .p at the end
-    if ~fname.endswith('.p'):
+    if fname.endswith('.p')==0:
         fname = fname + '.p'
-    pickle.load(open(fname, "rb"))
+    return pickle.load(open(fname, "rb"))

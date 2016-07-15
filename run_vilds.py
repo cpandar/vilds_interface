@@ -25,9 +25,10 @@ print "Writing model out to: " + model_outfile
 print "Writing estimates out to: " + estimates_outfile
 
 if len(sys.argv)>4:
-    nlatent = int(sys.argv[4])
+    n_latent = int(sys.argv[4])
 else:
-    nlatent = 3;
+    n_latent = 3;
+    print "Assuming latent dimensionality of " + str(n_latent)
 
 print('loading data from: ' + spikefile)
 data_in = file_utils.load(spikefile)
@@ -52,10 +53,11 @@ print 'training trials: ' + str(n_train_trials)
 print 'validation trials: ' + str(n_valid_trials)
 print 'num timebins: ' + str(n_timebins)
 print 'num neurons: ' + str(n_neurons)
+print 'latent dimensionality: ' + str(n_latent)
 
 # the variables 'yDim' and 'xDim' are used later in the code.
 yDim = n_neurons
-xDim = nlatent
+xDim = n_latent
 
 import numpy as np
 # the full data in the "y_data" variable is used to set the network means
@@ -201,7 +203,7 @@ yiter = DatasetMiniBatchIndexIterator(y_data_train)
 
 ########################################
 # Iterate over the training data for the specified number of epochs
-n_epochs = 20
+n_epochs = 1
 cost = []
 for ie in np.arange(n_epochs):
     print('--> entering epoch %d' % ie)
@@ -222,12 +224,28 @@ posterior_means_valid=[]
 for itr in np.arange(y_data_valid.shape[0]):
     posterior_means_valid.append(sgvb.mrec.postX.eval({sgvb.Y: y_data_valid[itr]}))
 
+posterior_means_y_train=[]
+for itr in np.arange(len(posterior_means_train)):
+    posterior_means_y_train.append(sgvb.mprior.rate.eval({sgvb.mprior.Xsamp: posterior_means_train[itr]}))
 
+posterior_means_y_valid=[]
+for itr in np.arange(len(posterior_means_valid)):
+    posterior_means_y_valid.append(sgvb.mprior.rate.eval({sgvb.mprior.Xsamp: posterior_means_valid[itr]}))
+
+
+
+
+
+
+
+# save the model via cpickle
 file_utils.pickle_sgvb(sgvb, model_outfile)
 
-
+# save the posterior estimates 
 dict_out = {'posterior_means_train' : posterior_means_train,
-            'posterior_means_valid' : posterior_means_valid}
+            'posterior_means_valid' : posterior_means_valid,
+            'posterior_means_y_train' : posterior_means_y_train,
+            'posterior_means_y_valid' : posterior_means_y_valid}
 
 file_utils.save(dict_out, estimates_outfile)
 
