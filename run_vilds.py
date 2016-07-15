@@ -203,7 +203,7 @@ yiter = DatasetMiniBatchIndexIterator(y_data_train)
 
 ########################################
 # Iterate over the training data for the specified number of epochs
-n_epochs = 1
+n_epochs = 20
 cost = []
 for ie in np.arange(n_epochs):
     print('--> entering epoch %d' % ie)
