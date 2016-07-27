@@ -1,10 +1,10 @@
 #!/usr/bin/python
-
+# Chethan Pandarinath
 # code to run vilds. based off of the vilds tutorial in their codepack
 # (must pull the codepack from https://github.com/earcher/vilds)
 
 # calling syntax:
-#   run_vilds infile.hf5 outfile.hf5 [num_latents] 
+#   run_vilds infile.hf5 model_outfile.hf5 estimates_outfile.hf5 [num_latents] [ffn_width]
 # num_latents defaults to 3 if not specified
 
 # must specify where the vilds code is
@@ -29,6 +29,13 @@ if len(sys.argv)>4:
 else:
     n_latent = 3;
     print "Assuming latent dimensionality of " + str(n_latent)
+
+
+if len(sys.argv)>5:
+    width_ffn = int(sys.argv[5])
+else:
+    width_ffn = 25;
+    print "Assuming feed forward network width of " + str(width_ffn)
 
 print('loading data from: ' + spikefile)
 data_in = file_utils.load(spikefile)
@@ -105,7 +112,7 @@ from SGVB import *                  # The meat of the algorithm - define the ELB
 ########################################
 # Describe network for mapping into means
 NN_Mu = lasagne.layers.InputLayer((None, yDim))
-NN_Mu = lasagne.layers.DenseLayer(NN_Mu, 25, nonlinearity=tanh, W=lasagne.init.Orthogonal())
+NN_Mu = lasagne.layers.DenseLayer(NN_Mu, width_ffn, nonlinearity=tanh, W=lasagne.init.Orthogonal())
 #--------------------------------------
 # let's initialize the first layer to have 0 mean wrt our training data
 W0 = np.asarray(NN_Mu.W.get_value(), dtype=theano.config.floatX)
@@ -121,7 +128,7 @@ NN_Mu = dict([('network', NN_Mu)])
 ########################################
 # Describe network for mapping into Covariances
 NN_Lambda = lasagne.layers.InputLayer((None, yDim))
-NN_Lambda = lasagne.layers.DenseLayer(NN_Lambda, 25, nonlinearity=tanh, W=lasagne.init.Orthogonal())
+NN_Lambda = lasagne.layers.DenseLayer(NN_Lambda, width_ffn, Nonlinearity=tanh, W=lasagne.init.Orthogonal())
 #--------------------------------------
 # let's initialize the first layer to have 0 mean wrt our training data
 W0 = np.asarray(NN_Lambda.W.get_value(), dtype=theano.config.floatX)
