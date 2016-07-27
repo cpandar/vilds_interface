@@ -128,7 +128,7 @@ NN_Mu = dict([('network', NN_Mu)])
 ########################################
 # Describe network for mapping into Covariances
 NN_Lambda = lasagne.layers.InputLayer((None, yDim))
-NN_Lambda = lasagne.layers.DenseLayer(NN_Lambda, width_ffn, Nonlinearity=tanh, W=lasagne.init.Orthogonal())
+NN_Lambda = lasagne.layers.DenseLayer(NN_Lambda, width_ffn, nonlinearity=tanh, W=lasagne.init.Orthogonal())
 #--------------------------------------
 # let's initialize the first layer to have 0 mean wrt our training data
 W0 = np.asarray(NN_Lambda.W.get_value(), dtype=theano.config.floatX)
