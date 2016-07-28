@@ -13,12 +13,13 @@ From Matlab:
 
 From the command line:
 
-```python run_vilds.py outfile_for_spiking_data outfile_for_vilds_model outfile_for_vilds_estimates n_latents```
+```python run_vilds.py outfile_for_spiking_data outfile_for_vilds_model outfile_for_vilds_estimates n_latents ffn_width```
 
 - *outfile_for_spiking_data* - filename, output from previous step
 - *outfile_for_vilds_model* - filename, will be written, stores the results of vilds model fit
 - *outfile_for_vilds_estimates* - filename, will be written, stores estimates computed using the vilds model (e.g., posterior means)
 - *n_latents* - dimensionality of the LDS to fit
+- *ffn_width* - width of the feed-forward network that maps latents onto observed firing rates
 
 
 Back in Matlab:
@@ -30,7 +31,7 @@ Back in Matlab:
 
 ## Components
 ### Matlab code: 
-`vildsi_export_spikes.m` - outputs spikes to an hdf5 file for easy import in Python
+`vildsi_export_spikes.m` - outputs spikes to an hdf5 file for easy import into Python
 
 `vildsi_import_results.m` - takes the resulting output and makes it easily parse-able in Matlab
 

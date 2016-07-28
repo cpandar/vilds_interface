@@ -7,10 +7,9 @@ function vildsi_export_spikes(outfile, ytrain, ytest, varargin)
 %
 %     outfile: filename to output data to. it's reasonable to use the extension ".h5"
 %
-%     ytrain: millisecond-binned spiketrains to train model. in Matlab, it should be a 3-D array, [nTrials x
-%   nTimesteps x nNeurons]
+%     ytrain: binned spiketrains to train model. in Matlab, it should be a 3-D array, [nTrials x nTimesteps x nNeurons]
 %
-%     ytest: millisecond-binned spiketrains to validate model. in Matlab, it should be a 3-D array, [nTrials x nTimesteps x nNeurons]
+%     ytest: binned spiketrains to validate model. in Matlab, it should be a 3-D array, [nTrials x nTimesteps x nNeurons]
 %
 %   varargin: 'name' - value pairs
 %         other variables you may want to pass into the python code
