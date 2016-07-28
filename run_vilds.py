@@ -13,6 +13,8 @@ PATH_TO_VLDS = 'submodules/vilds/'
 # import the data
 import sys
 import file_utils
+import os
+
 
 # handle command line args
 # caller should pass in a filename for data to be loaded
@@ -20,6 +22,14 @@ assert len(sys.argv)>=3, 'need to pass in a filename to load, an output filename
 spikefile = sys.argv[1]
 model_outfile = sys.argv[2]
 estimates_outfile = sys.argv[3]
+
+# test if output folders exist and are writeable
+files = [model_outfile, estimates_outfile]
+for fn in files:
+    outpath1, jnk = os.path.split(fn)
+    assert os.path.isdir(outpath1), 'no directory ' + outpath1
+    assert os.access(outpath1, os.W_OK), 'can''t write to ' + outpath1
+            
 
 print "Writing model out to: " + model_outfile
 print "Writing estimates out to: " + estimates_outfile
@@ -217,42 +227,37 @@ for ie in np.arange(n_epochs):
     for y, _ in yiter:
         cost.append(train_fn(y))
     print cost[-1]
-#    cost.append(train_fn(y_data_train[0]))
 
+    # write out every fifth model, or last model
+    if (ie + 1) % 5 == 0 or ie == n_epochs :
+        print('--> writing model and posterior mean estimates for epoch %d' % ie)
 
+        model = sgvb
+        # now that model is trained, we should be able to calculate some posterior mean estimates
+        posterior_means_train=[]
+        for itr in np.arange(y_data_train.shape[0]):
+            posterior_means_train.append(sgvb.mrec.postX.eval({sgvb.Y: y_data_train[itr]}))
 
-model = sgvb
-# now that model is trained, we should be able to calculate some posterior mean estimates
-posterior_means_train=[]
-for itr in np.arange(y_data_train.shape[0]):
-    posterior_means_train.append(sgvb.mrec.postX.eval({sgvb.Y: y_data_train[itr]}))
+        posterior_means_valid=[]
+        for itr in np.arange(y_data_valid.shape[0]):
+            posterior_means_valid.append(sgvb.mrec.postX.eval({sgvb.Y: y_data_valid[itr]}))
 
-posterior_means_valid=[]
-for itr in np.arange(y_data_valid.shape[0]):
-    posterior_means_valid.append(sgvb.mrec.postX.eval({sgvb.Y: y_data_valid[itr]}))
+        posterior_means_y_train=[]
+        for itr in np.arange(len(posterior_means_train)):
+            posterior_means_y_train.append(sgvb.mprior.rate.eval({sgvb.mprior.Xsamp: posterior_means_train[itr]}))
 
-posterior_means_y_train=[]
-for itr in np.arange(len(posterior_means_train)):
-    posterior_means_y_train.append(sgvb.mprior.rate.eval({sgvb.mprior.Xsamp: posterior_means_train[itr]}))
+        posterior_means_y_valid=[]
+        for itr in np.arange(len(posterior_means_valid)):
+            posterior_means_y_valid.append(sgvb.mprior.rate.eval({sgvb.mprior.Xsamp: posterior_means_valid[itr]}))
 
-posterior_means_y_valid=[]
-for itr in np.arange(len(posterior_means_valid)):
-    posterior_means_y_valid.append(sgvb.mprior.rate.eval({sgvb.mprior.Xsamp: posterior_means_valid[itr]}))
+        # save the model via cpickle
+        file_utils.pickle_sgvb(sgvb, model_outfile)
 
+        # save the posterior estimates 
+        dict_out = {'posterior_means_train' : posterior_means_train,
+                    'posterior_means_valid' : posterior_means_valid,
+                    'posterior_means_y_train' : posterior_means_y_train,
+                    'posterior_means_y_valid' : posterior_means_y_valid}
 
-
-
-
-
-
-# save the model via cpickle
-file_utils.pickle_sgvb(sgvb, model_outfile)
-
-# save the posterior estimates 
-dict_out = {'posterior_means_train' : posterior_means_train,
-            'posterior_means_valid' : posterior_means_valid,
-            'posterior_means_y_train' : posterior_means_y_train,
-            'posterior_means_y_valid' : posterior_means_y_valid}
-
-file_utils.save(dict_out, estimates_outfile)
+        file_utils.save(dict_out, estimates_outfile)
 
