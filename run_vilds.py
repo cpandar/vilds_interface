@@ -215,18 +215,27 @@ class DatasetMiniBatchIndexIterator(object):
             yield [self.y[i], i]
 
 
-# initialize the iterator with training data
-yiter = DatasetMiniBatchIndexIterator(y_data_train)
+
 
 ########################################
 # Iterate over the training data for the specified number of epochs
+# add a timer
+import datetime
+
+# initialize the iterator with training data
+yiter = DatasetMiniBatchIndexIterator(y_data_train)
 n_epochs = 20
 cost = []
 for ie in np.arange(n_epochs):
     print('--> entering epoch %d' % ie)
+
+    timea=datetime.datetime.now()
     for y, _ in yiter:
         cost.append(train_fn(y))
     print cost[-1]
+    timeb=datetime.datetime.now()
+    timec=timeb-timea
+    print str(timec.days) + " days, " + str(timec.seconds) + " sec"
 
     # write out every fifth model, or last model
     if (ie + 1) % 5 == 0 or ie == n_epochs :
